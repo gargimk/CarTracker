@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="carTrackerWebApp">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>Car Tracker Web App</title>
+
+<!-- Bootstrap Core CSS -->
+<link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- MetisMenu CSS -->
+<link href="../vendor/metisMenu/metisMenu.min.css" rel="stylesheet">
+
+<!-- Custom CSS -->
+<link href="../dist/css/sb-admin-2.css" rel="stylesheet">
+
+<link href="/css/style.css" rel="stylesheet">
+<link href="/css/angular-slider.min.css" rel="stylesheet">
+<!-- Morris Charts CSS -->
+<link href="../vendor/morrisjs/morris.css" rel="stylesheet">
+
+<!-- Custom Fonts -->
+<link href="../vendor/font-awesome/css/font-awesome.min.css"
+	rel="stylesheet" type="text/css">
+
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body ng-controller="carTrackerCtrl">
+
+	<!-- Navigation -->
+	<nav class="navbar navbar-default navbar-fixed-top">
+		<div class="container-fluid">
+			<!-- Brand and toggle get grouped for better mobile display -->
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed"
+					data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
+					aria-expanded="false">
+					<span class="sr-only">Toggle navigation</span> <span
+						class="icon-bar"></span> <span class="icon-bar"></span> <span
+						class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="#">Car Tracker</a>
+			</div>
+
+			<!-- Collect the nav links, forms, and other content for toggling -->
+			<div class="collapse navbar-collapse"
+				id="bs-example-navbar-collapse-1">
+				<ul class="nav navbar-nav">
+					<li><a href="#cartables">View Vehicle Details</a></li>
+					<li><a href="#historicalAlert">View Historical Alert</a></li>
+					<li class="dropdown"><a href="#plot" class="dropdown-toggle"
+						data-toggle="dropdown" role="button" aria-haspopup="true"
+						aria-expanded="false">Plots<span class="caret"></span></a>
+						<ul class="dropdown-menu">
+							<li><a href="#fuleVolumePlot">Fuel Volume Plot</a></li>
+							<li><a href="#engineRPMPlot">Engine RPM Plot</a></li>
+						</ul></li>
+					<li><a href="#">Maps</a></li>
+				</ul>
+
+			</div>
+			<!-- /.navbar-collapse -->
+		</div>
+		<!-- /.container-fluid -->
+
+	</nav>
+	<!-- /.row -->
+	<div class="container" style="padding: 25px;">
+		<div class="row" id="cartables">
+			<div class="col-lg-12">
+				<h1 class="page-header">Car Details</h1>
+			</div>
+			<!-- /.col-lg-12 -->
+			<!-- </div>
+			/.row
+			<div class="row" >
+			 -->
+			<div class="col-lg-12">
+				<div class="panel panel-default">
+					<div class="panel-heading">Car Details Table</div>
+					<!-- /.panel-heading -->
+					<div class="panel-body">
+						<table width="100%"
+							class="table table-striped table-bordered table-hover"
+							id="dataTables-example">
+							<thead>
+								<tr>
+									<th>VIN</th>
+									<th>Make</th>
+									<th>Model</th>
+									<th>Year</th>
+									<th>Read Line RPM</th>
+									<th>Max Fuel Volume</th>
+									<th>Last Service Date</th>
+									<!-- <th  class="sortorder" ng-click="sortBy('highAlert')"  ng-class="{reverse: reverse}">High Alert(in last 2hrs)</th> -->
+									<th sort by="order" reverse="reverse" order="'highAlert'">High
+										Alert(in last 2hrs)</th>
+								</tr>
+							</thead>
+							<tbody>
+								<!-- 		<tr ng-click="setSelected();" data-toggle="collapse"
+										data-target="#collapse-{{$index}}" class="accordion-toggle"> -->
+								<tr ng-repeat="item in vehicles| orderBy:order:reverse"
+									ng-click="setSelected()" class="clickable">
+									<td>{{ item.vin }}</td>
+									<td>{{ item.make }}</td>
+									<td>{{ item.model }}</td>
+									<td>{{ item.year }}</td>
+									<td>{{ item.readlineRpm }}</td>
+									<td>{{ item.maxFuelVolume }}</td>
+									<td>{{ item.lastServiceDate }}</td>
+									<td>{{ item.highAlert }}</td>
+								</tr>
+
+								<!-- <tr>
+										<td colspan="6" class="hiddenRow" style="padding: 0px;"><div
+												class="accordian-body collapse" id="collapse-{{$index}}">
+												<div>View historical alerts</div>
+											</div>
+										</td>
+									</tr> -->
+
+							</tbody>
+						</table>
+						<div class="collapse" id="collapseExample"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- /.row -->
+		<div class="row" id="historicalAlert">
+			<div class="col-lg-12">
+				<h1 class="page-header">Vehicle's Historical Alerts</h1>
+			</div>
+			<!-- /.col-lg-12 -->
+			<!-- </div>
+			/.row
+			<div class="row" >
+			 -->
+			<div class="col-lg-12">
+				<div class="form-group">
+					<label class="col-sm-4 control-label"> Select the vehicle
+						VIN:</label>
+					<div class="col-sm-8">
+						<select class="form-control"
+							ng-options="item.vin as item.vin for item in vehicles"
+							ng-model="selectedVehicle" ng-change="getHistoricalAlerts()"
+							style="width: 500px;">
+						</select>
+					</div>
+				</div>
+				<br> <br>
+				<div class="panel panel-default">
+					<div class="panel-heading">{{selectedVehicle}} Historical
+						Alert Table</div>
+					<!-- /.panel-heading -->
+					<div class="panel-body">
+						<table width="100%"
+							class="table table-striped table-bordered table-hover"
+							id="historicalAlertTable">
+							<thead>
+								<tr>
+									<th>VIN</th>
+									<th>Message</th>
+									<th>Priority</th>
+									<th>Rule</th>
+								</tr>
+							</thead>
+							<tbody>
+								<!-- 		<tr ng-click="setSelected();" data-toggle="collapse"
+										data-target="#collapse-{{$index}}" class="accordion-toggle"> -->
+								<tr
+									ng-repeat="item in data.slice(((currentPage-1)*itemsPerPage), ((currentPage)*itemsPerPage))"
+									ng-click="setSelected();" class="clickable">
+									<td>{{ item.vin }}</td>
+									<td>{{ item.message }}</td>
+									<td>{{ item.priority }}</td>
+									<td>{{ item.rule }}</td>
+								</tr>
+
+								<!-- <tr>
+										<td colspan="6" class="hiddenRow" style="padding: 0px;"><div
+												class="accordian-body collapse" id="collapse-{{$index}}">
+												<div>View historical alerts</div>
+											</div>
+										</td>
+									</tr> -->
+
+							</tbody>
+						</table>
+						View <select ng-model="viewby" ng-change="setItemsPerPage(viewby)"><option>3</option>
+							<option>5</option>
+							<option>10</option>
+							<option>20</option>
+							<option>30</option>
+							<option>40</option>
+							<option>50</option></select> records at a time.
+
+						<pagination total-items="totalItems" ng-model="currentPage"
+							max-size="maxSize" class="pagination-sm" boundary-links="true"
+							rotate="false" num-pages="numPages" items-per-page="itemsPerPage"></pagination>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+		<div class="row" id="plots">
+			<div class="col-lg-12">
+				<h1 class="page-header">Plots</h1>
+			</div>
+			<!-- /.col-lg-12 -->
+			<!-- </div>
+			/.row
+			<div class="row" >
+			 -->
+			<div class="col-lg-12">
+				<div class="form-group">
+					<label class="col-sm-4 control-label"> Select the vehicle
+						VIN:</label>
+					<div class="col-sm-8">
+						<select class="form-control"
+							ng-options="item.vin as item.vin for item in vehicles"
+							ng-model="selectedVehicle_fuelVolume" style="width: 500px;">
+						</select>
+					</div>
+					<br>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-4 control-label"> Enter number of
+						hours:</label>
+					<div class="col-sm-8">
+						<select class="form-control"
+							ng-options="item as item for item in hours"
+							ng-model="selectedhours" ng-change="getFuelVolumeData()"
+							style="width: 500px;">
+						</select>
+					</div>
+				</div>
+				<br> <br> <br>
+				<div class="row" id="plot">
+					<div class="col-lg-12">
+						<div class="panel panel-default">
+							<div class="panel-heading">Plot for readings</div>
+							<!-- /.panel-heading -->
+							<div class="panel-body">
+								<div id="morris-area-chart"></div>
+							</div>
+							<!-- /.panel-body -->
+						</div>
+						<!-- /.panel -->
+					</div>
+					<br> <br> <br>
+					<div class="col-lg-12" id="fuleVolumePlot">
+						<div class="col-lg-12">
+							<h2 class="page-header">Fuel Volume Plot</h2>
+						</div>
+						<div class="panel panel-default">
+							<div class="panel-heading">Fuel Volume Bar Chart</div>
+							<!-- /.panel-heading -->
+							<div class="panel-body">
+								<div id="morris-bar-chart1"></div>
+							</div>
+							<!-- /.panel-body -->
+						</div>
+						<!-- /.panel -->
+					</div>
+					<div class="col-lg-12" id="engineRPMPlot">
+						<div class="col-lg-12">
+							<h2 class="page-header">Engine RPM Plot</h2>
+						</div>
+						<div class="panel panel-default">
+							<div class="panel-heading">Engine RPM Bar Chart</div>
+							<!-- /.panel-heading -->
+							<div class="panel-body">
+								<div id="morris-bar-chart2"></div>
+							</div>
+							<!-- /.panel-body -->
+						</div>
+						<!-- /.panel -->
+					</div>
+
+				</div>
+			</div>
+			<!-- /.row -->
+
+		</div>
+
+		<!-- /#page-wrapper -->
+
+		<!-- /#wrapper -->
+
+
+
+		<!-- jQuery -->
+		<script src="../vendor/jquery/jquery.min.js"></script>
+
+		<!-- Bootstrap Core JavaScript -->
+		<script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
+
+		<!-- Metis Menu Plugin JavaScript -->
+		<script src="../vendor/metisMenu/metisMenu.min.js"></script>
+		<script
+			src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+
+		<!-- Morris Charts JavaScript -->
+		<script src="../vendor/raphael/raphael.min.js"></script>
+		<script src="../vendor/morrisjs/morris.min.js"></script>
+		<!-- Custom Theme JavaScript -->
+		<script src="../dist/js/sb-admin-2.js"></script>
+		<script src="/js/index.js"></script>
+		<script src="/js/angular-slider.min.js"></script>
+		<script src="/js/jquery.js"></script>
+		<script
+			src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.11.0.js"></script>
+		<!-- Page-Level Demo Scripts - Tables - Use for reference -->
+</body>
+
+</html>
